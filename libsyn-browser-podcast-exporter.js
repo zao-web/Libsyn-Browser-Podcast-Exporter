@@ -243,7 +243,7 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 *
 	 * @since  0.1.0
 	 */
-	app.updatePodcastURL = function() {
+	app.updatePodcastURL = function( again ) {
 		var $input = $( app.embedCodeModalIdInputSelector );
 
 		if ( ! $input.length ) {
@@ -260,22 +260,39 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 
 			// Whoops.
 			return console.error( { 'currentPodcastId' : app.currentPodcastId, 'id' : id } );
-
 		}
 
 		var $urlInput       = $( app.directDownloadURLlabelSelector ).next().find( 'input' );
 		var $permalinkInput = $( app.directPermalinkURLlabelSelector ).next().find( 'input' );
 
-		if ( ! $urlInput.length ) {
+		if ( ! $urlInput.length && again ) {
 			// If we can't find the URL input...
 			return console.error( 'Cannot find the download URL input.' );
+		} else {
+			// Try one more time.
+			return setTimeout( function() {
+				app.updatePodcastURL( true );
+			}, 200 );
 		}
 
-		// Update the current podcast object's URL.
 		app.podcasts[ id ].url = $urlInput.val();
 
+		if ( $urlInput.length ) {
+			// Update the current podcast object's URL.
+			app.podcasts[ id ].url = $urlInput.val();
+		}
+
 		if ( $permalinkInput.length ) {
+			// Update the current podcast object's permalink.
 			app.podcasts[ id ].permalink = $permalinkInput.val();
+		}
+
+		if ( ! app.podcasts[ id ].url ) {
+			console.warn( 'Cannot finda a download url.', app.podcasts );
+		}
+
+		if ( ! app.podcasts[ id ].permalink ) {
+			console.warn( 'Cannot finda a permalink.', app.podcasts );
 		}
 
 		// Close the modal.

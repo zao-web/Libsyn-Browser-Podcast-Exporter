@@ -7,7 +7,7 @@ Drop the following Javascript snippet into your browser console when on your pod
 ```js
 !function(t,e,r){var s=t.createElement(e),n=t.getElementsByTagName(e)[0];
 s.async=1,s.src=r,n.parentNode.insertBefore(s,n)}(document,"script"
-,'https://cdn.rawgit.com/zao-web/libsyn-browser-podcast-exporter/v0.1.1/libsyn-browser-podcast-exporter.js?v='+Date.now() );
+,'https://cdn.rawgit.com/zao-web/libsyn-browser-podcast-exporter/v0.1.1/script.js?v='+Date.now() );
 ```
 
 Once the script is running, you can stop it, by adding `libsynBrowserMigrator.stop();` to your browser console.

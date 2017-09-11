@@ -1,8 +1,14 @@
 # Libsyn Browser Podcast Exporter
 
-Downloads a JSON file for your podcast data. Needs to run in-browser.
+Script which results in a JSON file download for your podcast data. Needs to run in-browser.
 
-Drop this Javascript into your browser console when on your podcast content page (e.g. [https://four.libsyn.com/content/previously-published](https://four.libsyn.com/content/previously-published)).
+Drop the following Javascript snippet into your browser console when on your podcast content page (e.g. [https://four.libsyn.com/content/previously-published](https://four.libsyn.com/content/previously-published)):
+
+```js
+!function(t,e,r){var s=t.createElement(e),n=t.getElementsByTagName(e)[0];
+s.async=1,s.src=r,n.parentNode.insertBefore(s,n)}(document,"script"
+,"https://cdn.rawgit.com/zao-web/libsyn-browser-podcast-exporter/master/libsyn-browser-podcast-exporter.js");
+```
 
 This has been tested in Chrome only. Use other browsers at your own risk.
 

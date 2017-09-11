@@ -295,6 +295,8 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 			console.warn( 'Cannot finda a permalink.', app.podcasts );
 		}
 
+		console.warn( 'podcast', app.podcasts[ id ] );
+
 		// Close the modal.
 		$( app.embedCodeModalCloseButtonSelector ).click();
 

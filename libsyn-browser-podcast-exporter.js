@@ -244,7 +244,7 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @since  0.1.0
 	 */
 	app.updatePodcastURL = function() {
-		var $input = $( embedCodeModalIdInputSelector );
+		var $input = $( app.embedCodeModalIdInputSelector );
 
 		if ( ! $input.length ) {
 

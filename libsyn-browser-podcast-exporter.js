@@ -1,4 +1,11 @@
-window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
+/**
+ * The migrator object.
+ *
+ * @version 0.1.1
+ *
+ * @type {Object}
+ */
+ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 
 ( function( window, document, $, app, undefined ) {
 	'use strict';
@@ -20,6 +27,15 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @type {Boolean}
 	 */
 	app.autostart = true;
+
+	/**
+	 * Whether to stop the script once it is running.
+	 *
+	 * @version 0.1.1
+	 *
+	 * @type {Boolean}
+	 */
+	app.stopScript = false;
 
 	/**
 	 * The jQuery selector string for the podcast rows.
@@ -146,6 +162,10 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @since  0.1.0
 	 */
 	app.fetchPodcastURLs = function () {
+		if ( app.checkStop() ) {
+			return;
+		}
+
 		app.currentPodcastId = app.podcastsToFetchURL.shift();
 
 		if ( ! app.currentPodcastId ) {
@@ -174,6 +194,10 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @since  0.1.0
 	 */
 	app.thisPageFetchingCompleted = function() {
+		if ( app.checkStop() ) {
+			return;
+		}
+
 		// Get the next page button.
 		var $next = $( app.nextPageSelector );
 
@@ -190,7 +214,8 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 
 			// Then download our file.
 			console.warn( 'podcasts DONE. Downloading JSON file.' );
-			app.download( JSON.stringify( app.podcasts ) );
+
+			app.download( JSON.stringify( Object.values( app.podcasts ) ) );
 
 		} else {
 
@@ -214,8 +239,16 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @since  0.1.0
 	 */
 	app.loopTableRows = function() {
+		if ( app.checkStop() ) {
+			return;
+		}
+
 		// Loop the table row elements...
 		$( app.tableRowSelector ).each( function() {
+			if ( app.checkStop() ) {
+				return false;
+			}
+
 			var $this = $( this );
 
 			var podcast = {
@@ -244,12 +277,19 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 	 * @since  0.1.0
 	 */
 	app.updatePodcastURL = function( again ) {
+		if ( app.checkStop() ) {
+			return;
+		}
+
+		again = again || 0;
+		again++;
+
 		var $input = $( app.embedCodeModalIdInputSelector );
 
 		if ( ! $input.length ) {
 
 			// If $input isn't found, the modal hasn't quite opened, so try again shortly.
-			return setTimeout( app.updatePodcastURL, 200 );
+			return app.retryUpdatePodcastURL( again );
 		}
 
 		// Get the modal's id.
@@ -265,14 +305,9 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 		var $urlInput       = $( app.directDownloadURLlabelSelector ).next().find( 'input' );
 		var $permalinkInput = $( app.directPermalinkURLlabelSelector ).next().find( 'input' );
 
-		if ( ! $urlInput.length && again ) {
-			// If we can't find the URL input...
-			return console.error( 'Cannot find the download URL input.' );
-		} else {
-			// Try one more time.
-			return setTimeout( function() {
-				app.updatePodcastURL( true );
-			}, 200 );
+		if ( ! $urlInput.length ) {
+			// Try again.
+			return app.retryUpdatePodcastURL( again );
 		}
 
 		app.podcasts[ id ].url = $urlInput.val();
@@ -288,14 +323,54 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 		}
 
 		if ( ! app.podcasts[ id ].url ) {
-			console.warn( 'Cannot finda a download url.', app.podcasts );
+			console.warn( 'Cannot find podcast download url.', app.podcasts );
 		}
 
 		if ( ! app.podcasts[ id ].permalink ) {
-			console.warn( 'Cannot finda a permalink.', app.podcasts );
+			console.warn( 'Cannot find podcast permalink.', app.podcasts );
 		}
 
-		console.warn( 'podcast', app.podcasts[ id ] );
+		app.fetchNextPodcastURL();
+	};
+
+	/**
+	 * If the update failed, retry it.
+	 *
+	 * @since  0.1.1
+	 *
+	 * @param  {int} again Number of tries.
+	 */
+	app.retryUpdatePodcastURL = function( again ) {
+		if ( app.checkStop() ) {
+			return;
+		}
+
+		var timeout = 200;
+		if ( again ) {
+			timeout = 500;
+		}
+
+		if ( again > 3 ) {
+			// If we can't find the URL input...
+			console.error( 'cannot retry update podcast url. Moving on.', app.podcasts[ app.currentPodcastId ] );
+			return app.fetchNextPodcastURL();
+		}
+
+		// Try again.
+		setTimeout( function() {
+			app.updatePodcastURL( again );
+		}, timeout );
+	};
+
+	/**
+	 * Close the embed-code modal and open the next row's.
+	 *
+	 * @since  0.1.1
+	 */
+	app.fetchNextPodcastURL = function() {
+		if ( app.checkStop() ) {
+			return;
+		}
 
 		// Close the modal.
 		$( app.embedCodeModalCloseButtonSelector ).click();
@@ -321,6 +396,32 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 		a.href = URL.createObjectURL( file );
 		a.download = name;
 		a.click();
+	};
+
+	/**
+	 * Check if the script should stop.
+	 *
+	 * @since  0.1.1
+	 *
+	 * @return {bool} Whether script is stopping.
+	 */
+	app.checkStop = function() {
+		if ( app.stopScript ) {
+			app.stopScript = false;
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Stope the script when it it is running.
+	 *
+	 * @since  0.1.0
+	 */
+	app.stop = function() {
+		console.warn('Stopping...');
+		app.stopScript = true;
 	};
 
 	/**

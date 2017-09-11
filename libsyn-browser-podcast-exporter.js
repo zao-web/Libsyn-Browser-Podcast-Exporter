@@ -227,10 +227,10 @@ window.libsynBrowserMigrator = window.libsynBrowserMigrator || {};
 
 			// If row found an ID and a title, then we havea podcast object.
 			if ( podcast.id && podcast.title ) {
-				app.podcasts[ id ] = $.extend( {}, app.podcastObjectParams, podcast );
+				app.podcasts[ podcast.id ] = $.extend( {}, app.podcastObjectParams, podcast );
 
 				// Queue this id for fetching the podcast URL.
-				app.podcastsToFetchURL.push( id );
+				app.podcastsToFetchURL.push( podcast.id );
 			}
 		} );
 

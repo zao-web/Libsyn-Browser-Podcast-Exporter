@@ -7,7 +7,7 @@ Drop the following Javascript snippet into your browser console when on your pod
 ```js
 !function(t,e,r){var s=t.createElement(e),n=t.getElementsByTagName(e)[0];
 s.async=1,s.src=r,n.parentNode.insertBefore(s,n)}(document,"script"
-,"https://cdn.rawgit.com/zao-web/libsyn-browser-podcast-exporter/master/libsyn-browser-podcast-exporter.js");
+,'https://cdn.rawgit.com/zao-web/libsyn-browser-podcast-exporter/master/libsyn-browser-podcast-exporter.js?v='+Date.now() );
 ```
 
 This has been tested in Chrome only. Use other browsers at your own risk.
